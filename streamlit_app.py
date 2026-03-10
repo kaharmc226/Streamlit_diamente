@@ -5,6 +5,7 @@ Encoding mirrors the training notebook: OneHotEncoder(drop='first') on cut/color
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -53,10 +54,13 @@ def load_model():
     model_path = Path(__file__).resolve().parent / "best_randomforest_model.pkl"
     if not model_path.exists():
         try:
+            # Prefer Streamlit secrets, then environment variables.
+            repo_id = st.secrets.get("HF_REPO_ID", os.getenv("HF_REPO_ID", "kmc226/diamond_rf-pred"))
+            token = st.secrets.get("HF_TOKEN", os.getenv("HF_TOKEN"))
             downloaded = hf_hub_download(
-                repo_id="kmc226/diamond_rf-pred",
+                repo_id=repo_id,
                 filename="best_randomforest_model.pkl",
-                use_auth_token=False,
+                token=token,
             )
             model_path = Path(downloaded)
         except Exception as exc:
